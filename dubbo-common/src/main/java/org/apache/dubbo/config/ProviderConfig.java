@@ -26,7 +26,7 @@ import java.util.Arrays;
  *
  * @export
  * @see org.apache.dubbo.config.ProtocolConfig
- * @see ServiceConfigBase
+ * @see ServiceConfigBaseloadbalance
  */
 public class ProviderConfig extends AbstractServiceConfig {
 
