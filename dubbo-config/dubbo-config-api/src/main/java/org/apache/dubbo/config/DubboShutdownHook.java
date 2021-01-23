@@ -125,7 +125,9 @@ public class DubboShutdownHook extends Thread {
 
     public static void destroyAll() {
         if (destroyed.compareAndSet(false, true)) {
+            //销毁注册中心--集销毁服务(Provider）以及Consumer（自身）
             AbstractRegistryFactory.destroyAll();
+            //销毁协议层（**Server，如HttpServer、NettyServer等）
             destroyProtocols();
         }
     }
@@ -133,12 +135,17 @@ public class DubboShutdownHook extends Thread {
     /**
      * Destroy all the protocols.
      */
+    //关闭所有的协议层
     public static void destroyProtocols() {
+        //加载协议的扩展点SPI的实现
+        //关闭之
         ExtensionLoader<Protocol> loader = ExtensionLoader.getExtensionLoader(Protocol.class);
         for (String protocolName : loader.getLoadedExtensions()) {
             try {
+                //如DubboProtocol、HttpProtocol等
                 Protocol protocol = loader.getLoadedExtension(protocolName);
                 if (protocol != null) {
+                    //关闭协议
                     protocol.destroy();
                 }
             } catch (Throwable t) {

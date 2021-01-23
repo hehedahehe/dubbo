@@ -59,6 +59,7 @@ public class ExecutorUtil {
         final ExecutorService es = (ExecutorService) executor;
         try {
             // Disable new tasks from being submitted
+            //调用ExecutorService shutdown方法，拒绝新任务
             es.shutdown();
         } catch (SecurityException ex2) {
             return;
@@ -67,14 +68,20 @@ public class ExecutorUtil {
         }
         try {
             // Wait a while for existing tasks to terminate
+            //等一会儿
+            //再次强制关闭
             if (!es.awaitTermination(timeout, TimeUnit.MILLISECONDS)) {
                 es.shutdownNow();
             }
         } catch (InterruptedException ex) {
+            //再次关闭，线程池的具体关闭逻辑参照ThreadPoolExecutor-Comment
             es.shutdownNow();
+            //中断当前线程
             Thread.currentThread().interrupt();
         }
         if (!isTerminated(es)) {
+            //如果未终止
+            //启动一个新的线程间歇重试地去终止它
             newThreadToCloseExecutor(es);
         }
     }

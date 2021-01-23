@@ -400,9 +400,11 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         }
     }
 
+    //销毁注册
     @Override
     public void destroy() {
         super.destroy();
+        //重试定时器停止
         retryTimer.stop();
     }
 

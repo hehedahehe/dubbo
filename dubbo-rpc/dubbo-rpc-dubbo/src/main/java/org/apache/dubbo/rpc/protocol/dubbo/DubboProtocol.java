@@ -601,6 +601,7 @@ public class DubboProtocol extends AbstractProtocol {
 
     @Override
     public void destroy() {
+        //关闭协议下的ProtocolServer
         for (String key : new ArrayList<>(serverMap.keySet())) {
             ProtocolServer protocolServer = serverMap.remove(key);
 
@@ -614,7 +615,7 @@ public class DubboProtocol extends AbstractProtocol {
                 if (logger.isInfoEnabled()) {
                     logger.info("Close dubbo server: " + server.getLocalAddress());
                 }
-
+                //关闭之
                 server.close(ConfigurationUtils.getServerShutdownTimeout());
 
             } catch (Throwable t) {

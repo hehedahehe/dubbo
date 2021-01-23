@@ -56,7 +56,6 @@ import static org.apache.dubbo.common.constants.RegistryConstants.ROUTERS_CATEGO
 
 /**
  * ZookeeperRegistry
- *
  */
 public class ZookeeperRegistry extends FailbackRegistry {
 
@@ -116,8 +115,11 @@ public class ZookeeperRegistry extends FailbackRegistry {
     public void destroy() {
         super.destroy();
         try {
+            //直接关闭ZK连接
+            //由于doRegister时创建是临时节点，故依据ZK的原理，该节点会被删除
             zkClient.close();
         } catch (Exception e) {
+            //FIXME 此处关闭逻辑处理有些过于简单了。底层关闭逻辑是交给了Curator框架
             logger.warn("Failed to close zookeeper client " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
@@ -125,6 +127,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
     @Override
     public void doRegister(URL url) {
         try {
+            //创建一个临时节点 ephemeral=true
             zkClient.create(toUrlPath(url), url.getParameter(DYNAMIC_KEY, true));
         } catch (Throwable e) {
             throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);

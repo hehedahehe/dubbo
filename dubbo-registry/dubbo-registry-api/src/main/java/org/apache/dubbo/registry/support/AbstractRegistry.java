@@ -465,11 +465,13 @@ public abstract class AbstractRegistry implements Registry {
         if (logger.isInfoEnabled()) {
             logger.info("Destroy registry:" + getUrl());
         }
+        //获取Provider服务注册地址
         Set<URL> destroyRegistered = new HashSet<>(getRegistered());
         if (!destroyRegistered.isEmpty()) {
             for (URL url : new HashSet<>(getRegistered())) {
                 if (url.getParameter(DYNAMIC_KEY, true)) {
                     try {
+                        //移除本地 ProviderURL
                         unregister(url);
                         if (logger.isInfoEnabled()) {
                             logger.info("Destroy unregister url " + url);
@@ -480,12 +482,14 @@ public abstract class AbstractRegistry implements Registry {
                 }
             }
         }
+        //获取本地订阅的Consumer地址
         Map<URL, Set<NotifyListener>> destroySubscribed = new HashMap<>(getSubscribed());
         if (!destroySubscribed.isEmpty()) {
             for (Map.Entry<URL, Set<NotifyListener>> entry : destroySubscribed.entrySet()) {
                 URL url = entry.getKey();
                 for (NotifyListener listener : entry.getValue()) {
                     try {
+                        //FIXME 本地取消订阅列表?
                         unsubscribe(url, listener);
                         if (logger.isInfoEnabled()) {
                             logger.info("Destroy unsubscribe url " + url);
@@ -496,6 +500,7 @@ public abstract class AbstractRegistry implements Registry {
                 }
             }
         }
+        //注册工厂，移除该注册
         AbstractRegistryFactory.removeDestroyedRegistry(this);
     }
 

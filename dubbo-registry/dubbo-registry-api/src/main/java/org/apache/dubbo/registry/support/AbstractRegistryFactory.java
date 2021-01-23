@@ -69,9 +69,13 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
     }
 
     /**
+     * 关闭所有的注册
      * Close all created registries
      */
     public static void destroyAll() {
+        //进行Factory状态变更
+        //处于并发安全的考虑：
+        //采用乐观锁的机制 进行资源抢占；直接返回，客户端来决定是否进行重试
         if (!destroyed.compareAndSet(false, true)) {
             return;
         }
@@ -80,10 +84,13 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
             LOGGER.info("Close all registries " + getRegistries());
         }
         // Lock up the registry shutdown process
+        //加锁
         LOCK.lock();
         try {
+            //关闭所有的注册
             for (Registry registry : getRegistries()) {
                 try {
+                    //如ZK注册、Redis注册、ETCD注册等
                     registry.destroy();
                 } catch (Throwable e) {
                     LOGGER.error(e.getMessage(), e);
@@ -91,7 +98,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
             }
             REGISTRIES.clear();
         } finally {
-            // Release the lock
+            //释放锁
             LOCK.unlock();
         }
     }

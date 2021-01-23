@@ -105,9 +105,13 @@ public class HeaderExchangeServer implements ExchangeServer {
         if (timeout > 0) {
             final long max = (long) timeout;
             final long start = System.currentTimeMillis();
+            //这里将会向服务消费者发送 READ_ONLY 事件。
             if (getUrl().getParameter(Constants.CHANNEL_SEND_READONLYEVENT_KEY, true)) {
+                //消费者接受之后，主动排除这个节点，将请求发往其他正常节点。
+                //这样又进一步降低了注册中心通知延迟带来的影响。
                 sendChannelReadOnlyEvent();
             }
+            //如果该server还在运行的话，则等一会
             while (HeaderExchangeServer.this.isRunning()
                     && System.currentTimeMillis() - start < max) {
                 try {
@@ -117,6 +121,7 @@ public class HeaderExchangeServer implements ExchangeServer {
                 }
             }
         }
+        //
         doClose();
         server.close(timeout);
     }

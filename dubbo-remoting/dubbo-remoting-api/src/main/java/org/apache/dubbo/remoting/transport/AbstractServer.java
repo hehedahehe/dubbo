@@ -142,6 +142,7 @@ public abstract class AbstractServer extends AbstractEndpoint implements Remotin
 
     @Override
     public void close(int timeout) {
+        //优雅关闭Executor
         ExecutorUtil.gracefulShutdown(executor, timeout);
         close();
     }
